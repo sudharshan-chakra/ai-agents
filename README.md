@@ -14,10 +14,10 @@ Each AI agent exists as its own independent module inside this repository.
 
 ## 🧱 Current Agents
 
-| Agent Name               | Purpose                                 | Status     |
-|--------------------------|-----------------------------------------|------------|
-| Portfolio Helper Agent   | Provides portfolio insights via LLMs and APIs | ✅ In Progress |
-| Sales Helper Agent (Planned) | TBD | 🟡 Planned |
+| Agent Name               | Purpose                                 | Status     | Credits (if any) |
+|--------------------------|-----------------------------------------|------------|------------------|
+| Portfolio Helper Agent   | Provides portfolio insights via LLMs and APIs | ✅ Completed | [Andrew Baisden](https://www.freecodecamp.org/news/build-a-team-of-ai-agents-for-your-website-for-free/) |
+| Sales Helper Agent (Planned) | TBD | 🟡 Planned | |
 
 ---
 
