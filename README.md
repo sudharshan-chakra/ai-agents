@@ -17,7 +17,7 @@ Each AI agent exists as its own independent module inside this repository.
 | Agent Name               | Purpose                                 | Status     | Credits (if any) |
 |--------------------------|-----------------------------------------|------------|------------------|
 | Portfolio Helper Agent   | Provides portfolio insights via LLMs and APIs | ✅ Completed | [Andrew Baisden](https://www.freecodecamp.org/news/build-a-team-of-ai-agents-for-your-website-for-free/) |
-| Sales Helper Agent (Planned) | TBD | 🟡 Planned | |
+| Financial Analysis Agent | Fetch real-time financial news and investment insights | ✅ Backend Completed | [Saimadhu Polamuri](https://dataaspirant.com/building-financial-agent-agno-groq/) |
 
 ---
 
