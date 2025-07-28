@@ -46,3 +46,21 @@ cd portfolio-helper-agents/frontend
 npm install
 npm run dev
 ```
+
+#### Setting up an environmental variables file (.env):
+- Create a .env file in the root directory.
+- Add your API keys and other necessary environment variables
+```bash
+GROQ_API_KEY=your_groq_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
+```
+- This is safe because the .env file will be ignored by Git as it has been added to .gitignore.
+- We load the env variables like so:
+```python
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+groq_api_key = os.getenv("GROQ_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
+```
