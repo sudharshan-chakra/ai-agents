@@ -18,6 +18,7 @@ Each AI agent exists as its own independent module inside this repository.
 |--------------------------|-----------------------------------------|------------|------------------|
 | Portfolio Helper Agent   | Provides portfolio insights via LLMs and APIs | ✅ Completed | [Andrew Baisden](https://www.freecodecamp.org/news/build-a-team-of-ai-agents-for-your-website-for-free/) |
 | Financial Analysis Agent | Fetch real-time financial news and investment insights | ✅ Backend Completed | [Saimadhu Polamuri](https://dataaspirant.com/building-financial-agent-agno-groq/) |
+| Basic Code Agent (HuggingFace AI Agents course) | Simple Code agents with tools such as web search, current time in any timezone given a city, etc grounded on a base code agent  | 🛠️ In Progress | [HuggingFace](https://huggingface.co/learn/agents-course/unit1/tutorial) |
 
 ---
 
