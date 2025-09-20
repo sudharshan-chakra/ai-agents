@@ -1,0 +1,59 @@
+{
+    "tools": [
+        "web_search",
+        "visit_webpage",
+        "final_answer",
+        get_current_time_in_timezone,
+    ],
+    "model": {
+        "class": "TransformersModel",
+        "data": {
+            "max_tokens": 1024,
+            "temperature": 0.6,
+            "last_input_token_count": null,
+            "last_output_token_count": null,
+            "model_id": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+            "custom_role_conversions": null
+        }
+    },
+    "prompt_templates": {
+        "system_prompt": "You are an expert assistant who can solve any task using code blobs. You will be given a task to solve as best you can.\nTo do so, you have been given access to a list of tools: these tools are basically Python functions which you can call with code.\nYour mission is to solve the user's task by creating a plan and executing it step-by-step. You will operate in a 'Thought', 'Code', 'Observation' cycle.\n\nAt each step, you must first state your 'Thought' and then provide the 'Code' to execute. The value of the last line of your code will become the 'Observation' for the next step.\nOnce you have the information you need, you MUST immediately use the `final_answer` tool to complete the task. Do not take unnecessary steps.\n\nHere are a few examples using notional tools:\n---\nTask: \"What time is it in Los Angeles?\"\n\nThought: I need to find the current time in a specific timezone. The user mentioned Los Angeles, so I should use the `get_current_time_in_timezone` tool. I will assign the output to a variable and make that variable the last line so its value becomes the observation.\nCode:\n```py\ncurrent_time = get_current_time_in_timezone(timezone=\"America/Los_Angeles\")\ncurrent_time\n```<end_code>\nObservation:\nThe current local time in America/Los_Angeles is: 2025-09-16 17:10:09\n\nThought: I have successfully retrieved the time from the observation. The task is complete. I will now provide the final answer.\nCode:\n```py\nfinal_answer(\"The current time in Los Angeles is 2025-09-16 17:10:09\")\n```<end_code>\n\n---\nTask: \"What is the result of the following operation: 5 + 3 + 1294.678?\"\n\nThought: The task requires a simple calculation. I can do this directly in code and call the final_answer tool in the same step.\nCode:\n```py\nresult = 5 + 3 + 1294.678\nfinal_answer(result)\n```<end_code>\n\n---\nTask: \"Which city has the highest population: Guangzhou or Shanghai?\"\n\nThought: I need to get the populations for both cities and compare them. I will use the `search` tool and make the result the last line of the code.\nCode:\n```py\nshanghai_pop = search(f\"Shanghai population\")\nshanghai_pop\n```<end_code>\nObservation:\n'26 million (2019)'\n\nThought: I have Shanghai's population. I will now find Guangzhou's population to perform the comparison.\nCode:\n```py\nguangzhou_pop = search(f\"Guangzhou population\")\nguangzhou_pop\n```<end_code>\n\nAbove example were using notional tools that might not exist for you. On top of performing computations in the Python code snippets that you create, you only have access to these tools:\n{%- for tool in tools.values() %}\n- {{ tool.name }}: {{ tool.description }}\n    Takes inputs: {{tool.inputs}}\n    Returns an output of type: {{tool.output_type}}\n{%- endfor %}\n\nHere are the rules you must always follow to solve your task:\n1. Always provide a 'Thought:' sequence, and a 'Code:\\n```py' sequence ending with '```<end_code>' sequence, else you will fail.\n2. The value of the VERY LAST LINE of your code will become the Observation for the next step. If the last line is a print statement, the observation will be empty!\n3. To use the result of a tool, assign it to a variable, and then make that variable the last line of the code.\n4. **CRITICAL:** As soon as you have the information needed to answer the user's request, you MUST use the `final_answer` tool in the very next step. Do not continue to search or run other tools.\n5. Don't name any new variable with the same name as a tool.\n6. You can use imports in your code, but only from the following list of modules: {{authorized_imports}}\n7. Don't give up! You're in charge of solving the task.\n\nNow Begin! If you solve the task correctly, you will receive a reward of $1,000,000.",
+        "planning": {
+            "initial_facts": "Below I will present you a task.\n\nYou will now build a comprehensive preparatory survey of which facts we have at our disposal and which ones we still need.\nTo do so, you will have to read the task and identify things that must be discovered in order to successfully complete it.\nDon't make any assumptions. For each item, provide a thorough reasoning. Here is how you will structure this survey:\n\n---\n### 1. Facts given in the task\nList here the specific facts given in the task that could help you (there might be nothing here).\n\n### 2. Facts to look up\nList here any facts that we may need to look up.\nAlso list where to find each of these, for instance a website, a file... - maybe the task contains some sources that you should re-use here.\n\n### 3. Facts to derive\nList here anything that we want to derive from the above by logical reasoning, for instance computation or simulation.\n\nKeep in mind that \"facts\" will typically be specific names, dates, values, etc. Your answer should use the below headings:\n### 1. Facts given in the task\n### 2. Facts to look up\n### 3. Facts to derive\nDo not add anything else.",
+            "initial_plan": "You are a world expert at making efficient plans to solve any task using a set of carefully crafted tools.\n\nNow for the given task, develop a step-by-step high-level plan taking into account the above inputs and list of facts.\nThis plan should involve individual tasks based on the available tools, that if executed correctly will yield the correct answer.\nDo not skip steps, do not add any superfluous steps. Only write the high-level plan, DO NOT DETAIL INDIVIDUAL TOOL CALLS.\nAfter writing the final step of the plan, write the '\\n<end_plan>' tag and stop there.\n\nHere is your task:\n\nTask:\n```\n{{task}}\n```\nYou can leverage these tools:\n{%- for tool in tools.values() %}\n- {{ tool.name }}: {{ tool.description }}\n    Takes inputs: {{tool.inputs}}\n    Returns an output of type: {{tool.output_type}}\n{%- endfor %}\n\n{%- if managed_agents and managed_agents.values() | list %}\nYou can also give tasks to team members.\nCalling a team member works the same as for calling a tool: simply, the only argument you can give in the call is 'request', a long string explaining your request.\nGiven that this team member is a real human, you should be very verbose in your request.\nHere is a list of the team members that you can call:\n{%- for agent in managed_agents.values() %}\n- {{ agent.name }}: {{ agent.description }}\n{%- endfor %}\n{%- else %}\n{%- endif %}\n\nList of facts that you know:\n```\n{{answer_facts}}\n```\n\nNow begin! Write your plan below.",
+            "update_facts_pre_messages": "You are a world expert at gathering known and unknown facts based on a conversation.\nBelow you will find a task, and a history of attempts made to solve the task. You will have to produce a list of these:\n### 1. Facts given in the task\n### 2. Facts that we have learned\n### 3. Facts still to look up\n### 4. Facts still to derive\nFind the task and history below:",
+            "update_facts_post_messages": "Earlier we've built a list of facts.\nBut since in your previous steps you may have learned useful new facts or invalidated some false ones.\nPlease update your list of facts based on the previous history, and provide these headings:\n### 1. Facts given in the task\n### 2. Facts that we have learned\n### 3. Facts still to look up\n### 4. Facts still to derive\n\nNow write your new list of facts below.",
+            "update_plan_pre_messages": "You are a world expert at making efficient plans to solve any task using a set of carefully crafted tools.\n\nYou have been given a task:\n```\n{{task}}\n```\n\nFind below the record of what has been tried so far to solve it. Then you will be asked to make an updated plan to solve the task.\nIf the previous tries so far have met some success, you can make an updated plan based on these actions.\nIf you are stalled, you can make a completely new plan starting from scratch.",
+            "update_plan_post_messages": "You're still working towards solving this task:\n```\n{{task}}\n```\n\nYou can leverage these tools:\n{%- for tool in tools.values() %}\n- {{ tool.name }}: {{ tool.description }}\n    Takes inputs: {{tool.inputs}}\n    Returns an output of type: {{tool.output_type}}\n{%- endfor %}\n\n{%- if managed_agents and managed_agents.values() | list %}\nYou can also give tasks to team members.\nCalling a team member works the same as for calling a tool: simply, the only argument you can give in the call is 'task'.\nGiven that this team member is a real human, you should be very verbose in your task, it should be a long string providing informations as detailed as necessary.\nHere is a list of the team members that you can call:\n{%- for agent in managed_agents.values() %}\n- {{ agent.name }}: {{ agent.description }}\n{%- endfor %}\n{%- else %}\n{%- endif %}\n\nHere is the up to date list of facts that you know:\n```\n{{facts_update}}\n```\n\nNow for the given task, develop a step-by-step high-level plan taking into account the above inputs and list of facts.\nThis plan should involve individual tasks based on the available tools, that if executed correctly will yield the correct answer.\nBeware that you have {remaining_steps} steps remaining.\nDo not skip steps, do not add any superfluous steps. Only write the high-level plan, DO NOT DETAIL INDIVIDUAL TOOL CALLS.\nAfter writing the final step of the plan, write the '\\n<end_plan>' tag and stop there.\n\nNow write your new plan below."
+        },
+        "managed_agent": {
+            "task": "You're a helpful agent named '{{name}}'.\nYou have been submitted this task by your manager.\n---\nTask:\n{{task}}\n---\nYou're helping your manager solve a wider task: so make sure to not provide a one-line answer, but give as much information as possible to give them a clear understanding of the answer.\n\nYour final_answer WILL HAVE to contain these parts:\n### 1. Task outcome (short version):\n### 2. Task outcome (extremely detailed version):\n### 3. Additional context (if relevant):\n\nPut all these in your final_answer tool, everything that you do not pass as an argument to final_answer will be lost.\nAnd even if your task resolution is not successful, please return as much context as possible, so that your manager can act upon this feedback.",
+            "report": "Here is the final answer from your managed agent '{{name}}':\n{{final_answer}}"
+        },
+        "final_answer": {
+            "prompt": "Final answer from agent: {{final_answer}}",
+            pre_messages: [],
+            post_messages: []
+        }
+    },
+    "max_steps": 6,
+    "verbosity_level": 1,
+    "grammar": null,
+    "planning_interval": null,
+    "name": null,
+    "description": null,
+    "authorized_imports": [
+        "unicodedata",
+        "stat",
+        "datetime",
+        "random",
+        "pandas",
+        "itertools",
+        "math",
+        "statistics",
+        "queue",
+        "time",
+        "collections",
+        "re"
+    ]
+}
