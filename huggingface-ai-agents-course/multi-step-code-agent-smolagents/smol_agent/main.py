@@ -56,7 +56,7 @@ class SuperheroPartyThemeTool(Tool):
 
         return themes.get(category.lower(), "Themed party idea not found. Try 'classic heroes', 'villain masquerade', or 'futuristic gotham'.")
 
-agent = CodeAgent(tools=[suggest_menu,WebSearchTool(),SuperheroPartyThemeTool], model=InferenceClientModel(), additional_authorized_imports=['datetime'])
+agent = CodeAgent(tools=[suggest_menu,WebSearchTool(),SuperheroPartyThemeTool()], model=InferenceClientModel(), additional_authorized_imports=['datetime'])
 
 # Step 1: Music recommendations
 agent.run("Search for the best music recommendations for a party at the Wayne's mansion.")
@@ -75,3 +75,8 @@ agent.run(
     If we start right now, at what time will the party be ready?
     """
 )
+
+agent.run("Give me best playlist for a party at the Wayne's mansion. The party idea is a 'villain masquerade' theme")
+
+# publish the agent on HFhub
+agent.push_to_hub('sudharshan-chakravarthy/AlfredAgent')
