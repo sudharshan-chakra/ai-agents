@@ -5,8 +5,9 @@ from datasets import Dataset
 import matplotlib.pyplot as plt
 import datasets
 
-from langchain.docstore.document import Document as LangchainDocument
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 
 pd.set_option(
     "display.max_colwidth", None
@@ -17,7 +18,7 @@ ds = datasets.load_dataset("m-ric/huggingface_doc", split="train")
 
 # Create the raw knowledge base 
 RAW_KNOWLEDGE_BASE = [
-    LangchainDocument(page_content=doc["text"], metadata={"source": doc["source"]})
+    Document(page_content=doc["text"], metadata={"source": doc["source"]})
     for doc in tqdm(ds)
 ]
 
