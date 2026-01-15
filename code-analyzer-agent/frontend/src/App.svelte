@@ -1,76 +1,93 @@
 <script lang="ts">
   import axios from 'axios';
 
-  let code = `def get_user(id):\n    query = "SELECT * FROM users WHERE id = '%s'" % id\n    return db.execute(query)`;
+  let code = `import sqlite3\n\ndef get_user(id):\n    conn = sqlite3.connect('users.db')\n    cursor = conn.cursor()\n    query = "SELECT * FROM users WHERE id = '%s'" % id\n    cursor.execute(query)\n    return cursor.fetchone()`;
   let filename = "database_helper.py";
   let scanResult: any = null;
   let loading = false;
 
   async function triggerScan() {
     loading = true;
+    scanResult = null;
     try {
+      // Step 1: Tell backend to scan
       const response = await axios.post('http://localhost:8000/scan', {
-        filename,
-        code
+        filename: filename,
+        code: code
       });
-      // Fetch the details immediately after scan
+      
+      // Step 2: Fetch the results for that scan ID
       const details = await axios.get(`http://localhost:8000/scans/${response.data.scan_id}`);
       scanResult = details.data;
     } catch (e) {
-      alert("Error connecting to backend. Is uvicorn running?");
+      console.error(e);
+      alert("Error: " + (e.response?.data?.detail || "Check backend console."));
     } finally {
       loading = false;
     }
   }
+
+  // The One-Click Apply Logic
+  function applyPatch(newCode: string) {
+    code = newCode;
+    alert("Patch applied! Re-run scan to verify.");
+  }
 </script>
 
 <main class="container">
-  <h1>ZeroPath Lite 🛡️</h1>
-  <p>Autonomous Bug-Fixer Prototype</p>
+  <div class="header">
+    <h1>Code Analyzer</h1>
+    <p>Autonomous Bug-Fixing Agent</p>
+  </div>
 
   <div class="grid">
-    <section>
-      <h3>Paste Python Code</h3>
-      <input type="text" bind:value={filename} placeholder="filename.py" />
-      <textarea bind:value={code} rows="10"></textarea>
-      <button on:click={triggerScan} disabled={loading}>
-        {loading ? "Analyzing..." : "Scan & Fix"}
+    <section class="editor-pane">
+      <h3>File: <input type="text" bind:value={filename} /></h3>
+      <textarea bind:value={code} rows="15"></textarea>
+      <button class="scan-btn" on:click={triggerScan} disabled={loading}>
+        {loading ? "AI is Analyzing..." : "Scan & Suggest Fix"}
       </button>
     </section>
 
-    <section>
-      <h3>Triage & Results</h3>
+    <section class="results-pane">
+      <h3>Analysis Results</h3>
       {#if scanResult}
         {#each scanResult.vulnerabilities as vuln}
-          <div class="card">
-            <span class="badge {vuln.severity.toLowerCase()}">{vuln.severity}</span>
-            <h4>{vuln.vuln_type}</h4>
+          <div class="vuln-card">
+            <div class="vuln-header">
+              <span class="severity {vuln.severity.toLowerCase()}">{vuln.severity}</span>
+              <strong>{vuln.vuln_type}</strong>
+            </div>
             <p>{vuln.description}</p>
             
-            <div class="patch-container">
-              <h5>Suggested Patch:</h5>
+            <div class="patch-box">
+              <h4>Suggested Patch:</h4>
               <pre><code>{vuln.suggested_patch}</code></pre>
-              <button class="apply-btn">One-Click Apply</button>
+              <button class="apply-btn" on:click={() => applyPatch(vuln.suggested_patch)}>
+                Apply Suggested Fix
+              </button>
             </div>
           </div>
         {:else}
-          <p class="success">✅ No vulnerabilities found!</p>
+          <div class="no-vulns">✅ Clean! No issues found.</div>
         {/each}
       {:else}
-        <p>Run a scan to see autonomous patches.</p>
+        <p class="placeholder">Click "Scan" to begin autonomous analysis.</p>
       {/if}
     </section>
   </div>
 </main>
 
 <style>
-  .container { max-width: 1000px; margin: 0 auto; padding: 2rem; font-family: sans-serif; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-  textarea { width: 100%; font-family: monospace; background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 8px; }
-  .card { border: 1px solid #ddd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: #f9f9f9; }
-  .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
-  .high { background: #ff4d4d; color: white; }
-  .patch-container { background: #e6fffa; padding: 1rem; border: 1px solid #38b2ac; border-radius: 4px; margin-top: 1rem; }
-  pre { font-size: 0.85rem; overflow-x: auto; }
-  .apply-btn { background: #38b2ac; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+  /* Add some basic styling to make it look like a pro dashboard */
+  .container { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: 'Inter', sans-serif; color: #b1aeae; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
+  textarea { width: 100%; background: #1a1a1a; color: #00ff00; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 14px; border: none; }
+  .scan-btn { width: 100%; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+  .vuln-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 15px; margin-bottom: 15px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  .severity { padding: 2px 8px; border-radius: 4px; font-size: 11px; text-transform: uppercase; margin-right: 10px; color: white; }
+  .high { background: #ef4444; }
+  .patch-box { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 6px; margin-top: 10px; }
+  pre { font-size: 12px; background: #f8fafc; padding: 10px; overflow-x: auto; }
+  .apply-btn { background: #16a34a; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
 </style>
