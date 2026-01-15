@@ -22,7 +22,7 @@ Each AI agent exists as its own independent module inside this repository.
 | Multi Step Code Agent (HuggingFace AI Agents course) | A collection tools for the party planning smol-agent to choose from  | ✅ Completed | [HuggingFace](https://huggingface.co/learn/agents-course/unit2/tutorial) |
 | Data Analyst Agent | A simple Data Analyst Agent (smolagent's CodeAgent with data science library access) solving the famous Kaggle Titanic problem  | ✅ Completed | [HuggingFace](https://huggingface.co/learn/cookbook/agent_data_analyst) |
 | RAG Agent (HuggingFace AI Agents course) | A collection of both a simple and an Agentic RAG agent  | 🛠️ In Progress | [HuggingFace](https://huggingface.co/learn/agents-course/unit2/smolagents/retrieval_agents) |
-
+| Code Analyzer Agent | End-End code Analyzer Agent    | 🛠️ In Progress | - |
 
 ---
 
